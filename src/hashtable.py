@@ -6,6 +6,29 @@ class LinkedPair:
         self.key = key
         self.value = value
         self.next = None
+    
+    def append_next(self, key, value):
+        if self.next == None:
+            self.next = LinkedPair(key, value)
+        else:
+            self.next.append_next(key, value)
+
+    def retrieve_key(self, key):
+        if self.key == key:
+            return self.value
+        else:
+            if self.next != None:
+                return self.next.retrieve_key(key)
+            else:
+                return None
+
+    def remove_key(self, key):
+        if self.next != None:
+            if self.next.remove_key(key):
+                self.next = None
+                return True
+        else:
+            return False
 
 class HashTable:
     '''
@@ -14,7 +37,7 @@ class HashTable:
     '''
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
-        self.storage = [None] * capacity
+        self.storage = [None] * self.capacity
 
 
     def _hash(self, key):
@@ -51,7 +74,15 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+
+        hash_index = self._hash_mod(key)
+        if self.storage[hash_index] == None:
+            self.storage[hash_index] = LinkedPair(key, value)
+        else:
+            if self.storage[hash_index].key == key:
+                self.storage[hash_index] = LinkedPair(key, value)
+            else:
+                self.storage[hash_index].append_next(key, value)
 
 
 
@@ -63,7 +94,16 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        hash_index = self._hash_mod(key)
+        if self.storage[hash_index] != None:
+            if self.storage[hash_index].key == key:
+                self.storage[hash_index] = None
+            else:
+                result = self.storage[hash_index].remove_key(key)
+                if result ==  False:
+                    print('Key does not exist in container')
+        else:
+            print('Key does not exist in container')
 
 
     def retrieve(self, key):
@@ -74,7 +114,11 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        hash_index = self._hash_mod(key)
+        if self.storage[hash_index] != None:
+            return self.storage[hash_index].retrieve_key(key)
+        else:
+            return None
 
 
     def resize(self):
@@ -84,7 +128,19 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        self.capacity *= 2
+        old_storage = self.storage
+        self.storage = [None] * self.capacity
+        for item in old_storage:
+            if item != None:
+                self.insert(item.key, item.value)
+                i_next = item.next
+                while i_next != None:
+                    self.insert(i_next.key, i_next.value)
+                    i_next = i_next.next
+
+
+
 
 
 
